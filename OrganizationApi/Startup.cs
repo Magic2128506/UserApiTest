@@ -33,11 +33,6 @@ namespace OrganizationApi
                 => x.UseNpgsql(connectionString));
             services.AddScoped<IApplicationDbContext>(x => x.GetRequiredService<ApplicationDbContext>());
 
-            services.AddMassTransit(c =>
-            {
-                c.AddConsumer<UserMessageConsumer>();
-            });
-
             var rabbitHost = Environment.GetEnvironmentVariable("RABBIT_HOST") ?? "localhost";
             var rabbitHostVirtualHost = Environment.GetEnvironmentVariable("RABBIT_HOST_VIRTUAL_HOST") ?? "/";
             var rabbitHostUserName = Environment.GetEnvironmentVariable("RABBIT_USERNAME") ?? "guest";
@@ -52,6 +47,11 @@ namespace OrganizationApi
             }));
             services.AddMediatR(typeof(Startup));
             services.AddAutoMapper(typeof(AppMappingProfile));
+
+            services.AddMassTransit(c =>
+            {
+                c.AddConsumer<UserMessageConsumer>();
+            });
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment _)
