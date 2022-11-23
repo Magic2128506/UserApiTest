@@ -9,6 +9,7 @@ namespace UserApi.Contract.Configuration
         public AppMappingProfile()
         {
             CreateMap<User, GetUsersQueryResponseItem>().ReverseMap();
+            CreateMap<User, UserViewModel>().ReverseMap();
         }
     }
 }

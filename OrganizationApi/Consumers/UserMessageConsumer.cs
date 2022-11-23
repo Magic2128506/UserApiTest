@@ -1,36 +1,29 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using MassTransit;
-using OrganizationApi.Data;
+using Microsoft.Extensions.DependencyInjection;
 using UserApi.Contract;
-using UserApi.Contract.Entities;
+using UserApi.Contract.Requests.ConsumerRequests.CreateUser;
+using IMediator = MediatR.IMediator;
 
 namespace OrganizationApi.Consumers
 {
     public class UserMessageConsumer : IConsumer<IUserMessage>
     {
-        private readonly IApplicationDbContext _dbContext;
+        private readonly IServiceProvider _serviceProvider;
 
-        public UserMessageConsumer(IApplicationDbContext dbContext)
-        {
-            _dbContext = dbContext;
-        }
+        public UserMessageConsumer(IServiceProvider serviceProvider) => _serviceProvider = serviceProvider;
 
         public async Task Consume(ConsumeContext<IUserMessage> context)
         {
             try
             {
-                var userModel = context.Message.UserViewModel;
-                var user = new User
-                {
-                    Name = userModel.Name,
-                    Email = userModel.Email,
-                    MiddleName = userModel.MiddleName,
-                    SurName = userModel.SurName,
-                    PhoneNumber = userModel.PhoneNumber
-                };
-
-                await _dbContext.Users.AddAsync(user);
-                await _dbContext.SaveChangesAsync();
+                var mediator = _serviceProvider.GetRequiredService<IMediator>();
+                await mediator.Send(
+                    new CreateUserCommand
+                    {
+                        UserViewModel = context.Message.UserViewModel
+                    });
 
                 await context.RespondAsync(context.Message.MessageId);
             }
